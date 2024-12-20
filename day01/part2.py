@@ -14,28 +14,51 @@ def compute(s: str) -> int:
     lines = s.splitlines()
 
     lines_increasing = []
-    lines_decreasing = []
-
     for line in lines:
         # split line into individual items
         items = line.split()
         # convert each item to the desired type
-        items = [int(item) for item in items] 
+        items = [int(item) for item in items]
 
         increasing = True
+        free_pass = True
+        remove = 0
+        i = 0
 
-        for i in range(len(items) - 1):
-            if items[i + 1] <= items[i]:
+        while i < len(items) - 1:
+            if items[i + 1] <= items[i] and free_pass is True:
+                remove = i + 1
+                free_pass = False
+            elif items[i + 1] <= items[i]:
                 increasing = False
+            i += 1
+
         if increasing is True:
+            items = items[:remove] + items[remove + 1:]
             lines_increasing.append(items)
 
-        decreasing = True
+    lines_decreasing = []
+    for line in lines:
+        # split line into individual items
+        items = line.split()
+        # convert each item to the desired type
+        items = [int(item) for item in items]
 
-        for i in range(len(items) - 1):
-            if items[i + 1] >= items[i]:
+        decreasing = True
+        free_pass = True
+        remove = 0
+        i = 0
+
+        while i < len(items) - 1:
+            if items[i + 1] >= items[i] and free_pass is True:
+                remove = i + 1
+                free_pass = False
+            elif items[i + 1] >= items[i]:
                 decreasing = False
+            i += 1
+
         if decreasing is True:
+            items = items[:remove] + items[remove + 1:]
             lines_decreasing.append(items)
 
     count = 0
@@ -61,12 +84,11 @@ def compute(s: str) -> int:
                 break
             if decr < 1 or decr > 3:
                 valid_flag = False
-                break   
             i += 1
         if valid_flag == True:
             count += 1
         
-    return count  # 279
+    return count  # more than 312 and not 320
 
 
 INPUT_S = '''\
@@ -77,7 +99,7 @@ INPUT_S = '''\
 8 6 4 4 1
 1 3 6 7 9
 '''
-EXPECTED = 2
+EXPECTED = 4
 
 
 @pytest.mark.parametrize(
