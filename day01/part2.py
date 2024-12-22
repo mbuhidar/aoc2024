@@ -11,95 +11,41 @@ INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
 def compute(s: str) -> int:
-    lines = s.splitlines()
+    # Parse the input, s, consisting of two columns of integers separated by whitespace
+    list1 = []
+    list2 = []
+    for line in s.splitlines():
+        list1.append(list(map(int, line.split()))[0])
+        list2.append(list(map(int, line.split()))[1])
 
-    lines_increasing = []
-    for line in lines:
-        # split line into individual items
-        items = line.split()
-        # convert each item to the desired type
-        items = [int(item) for item in items]
+    # sort each list
+    list1.sort()
+    list2.sort()
 
-        increasing = True
-        free_pass = True
-        remove = 0
-        i = 0
+    # bucket sort the list2
+    max_val = max(list2)
+    bucket = [0] * (max_val + 1)
+    for val in list2:
+        bucket[val] += 1
 
-        while i < len(items) - 1:
-            if items[i + 1] <= items[i] and free_pass is True:
-                remove = i + 1
-                free_pass = False
-            elif items[i + 1] <= items[i]:
-                increasing = False
-            i += 1
+    # calculate the similarity score by multiplying the number of occurrences of each list1 value in list2 
+    simliarity_list = []
+    for i in range(len(list1)):
+        if list1[i] < max_val:
+            simliarity_list.append(list1[i] * bucket[list1[i]])
 
-        if increasing is True:
-            items = items[:remove] + items[remove + 1:]
-            lines_increasing.append(items)
-
-    lines_decreasing = []
-    for line in lines:
-        # split line into individual items
-        items = line.split()
-        # convert each item to the desired type
-        items = [int(item) for item in items]
-
-        decreasing = True
-        free_pass = True
-        remove = 0
-        i = 0
-
-        while i < len(items) - 1:
-            if items[i + 1] >= items[i] and free_pass is True:
-                remove = i + 1
-                free_pass = False
-            elif items[i + 1] >= items[i]:
-                decreasing = False
-            i += 1
-
-        if decreasing is True:
-            items = items[:remove] + items[remove + 1:]
-            lines_decreasing.append(items)
-
-    count = 0
-    for line in lines_increasing:
-        i = 0
-        valid_flag = True
-        while i < len(line) - 1:
-            incr = line[i + 1] - line[i]
-            if valid_flag is False:
-                break
-            if incr < 1 or incr > 3:
-                valid_flag = False
-            i += 1
-        if valid_flag == True:
-            count += 1
-
-    for line in lines_decreasing:
-        i = 0
-        valid_flag = True
-        while i < len(line) - 1:
-            decr = line[i] - line[i + 1]
-            if valid_flag is False:
-                break
-            if decr < 1 or decr > 3:
-                valid_flag = False
-            i += 1
-        if valid_flag == True:
-            count += 1
-        
-    return count  # more than 312 and not 320
+    return sum(simliarity_list)  # 29379307
 
 
 INPUT_S = '''\
-7 6 4 2 1
-1 2 7 8 9
-9 7 6 2 1
-1 3 2 4 5
-8 6 4 4 1
-1 3 6 7 9
+3   4
+4   3
+2   5
+1   3
+3   9
+3   3
 '''
-EXPECTED = 4
+EXPECTED = 31
 
 
 @pytest.mark.parametrize(

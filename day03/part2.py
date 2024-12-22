@@ -11,51 +11,48 @@ import re
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
+def remove_between_tokens(s: str, start_token: str, end_token: str = '') -> str:
+    # Regex pattern to match the part between start_token and end_token
+    if end_token != '':
+        pattern = re.escape(start_token) + r'.*?' + re.escape(end_token)
+    else:
+        pattern = re.escape(start_token) + r'.*?$'
+    
+    # Replace the matched part with an empty string
+    result = re.sub(pattern, '', s)
+    
+    return result
+
+
 def compute(s: str) -> int:
     lines = s.splitlines()
-    grid = [list(line) for line in lines]
+    result = 0
 
-    count = 0
+    all_lines = ''
 
-    for i in range(1, len(grid) - 1):
-        for j in range(1, len(grid[i]) - 1):
-            if grid[i][j] == 'A':
-                valid = False
-                # Gather letters to the upper right, lower right, lower left, and upper left of A
-                letters = []
-                letters.append(grid[i - 1][j - 1])
-                letters.append(grid[i - 1][j + 1])
-                letters.append(grid[i + 1][j + 1])
-                letters.append(grid[i + 1][j - 1])
-                # Check for M and S in alternating pattern
-                if letters[0] == 'M' and letters[1] == 'S' and letters[2] == 'S' and letters[3] == 'M':
-                    valid = True
-                elif letters[0] == 'S' and letters[1] == 'M' and letters[2] == 'M' and letters[3] == 'S':
-                    valid = True
-                elif letters[0] == 'M' and letters[1] == 'M' and letters[2] == 'S' and letters[3] == 'S':
-                    valid = True
-                elif letters[0] == 'S' and letters[1] == 'S' and letters[2] == 'M' and letters[3] == 'M':
-                    valid = True
+    for line in lines:
+        all_lines += line
 
-                if valid:
-                    count += 1
+    start_token = "don't()"
+    end_token = "do()"
+    s = remove_between_tokens(all_lines, start_token, end_token)
+    start_token = "don't()"
+    line = remove_between_tokens(s, start_token)
+    # Regex pattern to find "mul(int,int)"
+    pattern = r"mul\(\d+,\d+\)"
+    # Find all matches
+    matches = re.findall(pattern, line)
+    for match in matches:
+        int1, int2 = map(int, re.findall(r"\d+", match))
+        result += int1 * int2
 
-    return count
+    return result
 
 
 INPUT_S = '''\
-MMMSXXMASM
-MSAMXMSMSA
-AMXSXMAAMM
-MSAMASMSMX
-XMASAMXAMM
-XXAMMXXAMA
-SMSMSASXSS
-SAXAMASAAA
-MAMMMXMMMM
-MXMXAXMASX
+xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
 '''
-EXPECTED = 9
+EXPECTED = 48
 
 
 @pytest.mark.parametrize(
@@ -76,7 +73,7 @@ def main() -> int:
     with open(args.data_file) as f, support.timing():
         print(compute(f.read()))
 
-    return 0  # 2662
+    return 0  # 77055967
 
 
 if __name__ == '__main__':

@@ -6,53 +6,100 @@ import os.path
 import pytest
 
 import support
-import re
 
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
-def remove_between_tokens(s: str, start_token: str, end_token: str = '') -> str:
-    # Regex pattern to match the part between start_token and end_token
-    if end_token != '':
-        pattern = re.escape(start_token) + r'.*?' + re.escape(end_token)
-    else:
-        pattern = re.escape(start_token) + r'.*?$'
-    
-    # Replace the matched part with an empty string
-    result = re.sub(pattern, '', s)
-    
-    return result
-
-
 def compute(s: str) -> int:
     lines = s.splitlines()
-    result = 0
 
-    all_lines = ''
-
+    lines_increasing = []
     for line in lines:
-        all_lines += line
+        # split line into individual items
+        items = line.split()
+        # convert each item to the desired type
+        items = [int(item) for item in items]
 
-    start_token = "don't()"
-    end_token = "do()"
-    s = remove_between_tokens(all_lines, start_token, end_token)
-    start_token = "don't()"
-    line = remove_between_tokens(s, start_token)
-    # Regex pattern to find "mul(int,int)"
-    pattern = r"mul\(\d+,\d+\)"
-    # Find all matches
-    matches = re.findall(pattern, line)
-    for match in matches:
-        int1, int2 = map(int, re.findall(r"\d+", match))
-        result += int1 * int2
+        increasing = True
+        free_pass = True
+        remove = 0
+        i = 0
 
-    return result
+        while i < len(items) - 1:
+            if items[i + 1] <= items[i] and free_pass is True:
+                remove = i + 1
+                free_pass = False
+            elif items[i + 1] <= items[i]:
+                increasing = False
+            i += 1
+
+        if increasing is True:
+            items = items[:remove] + items[remove + 1:]
+            lines_increasing.append(items)
+
+    lines_decreasing = []
+    for line in lines:
+        # split line into individual items
+        items = line.split()
+        # convert each item to the desired type
+        items = [int(item) for item in items]
+
+        decreasing = True
+        free_pass = True
+        remove = 0
+        i = 0
+
+        while i < len(items) - 1:
+            if items[i + 1] >= items[i] and free_pass is True:
+                remove = i + 1
+                free_pass = False
+            elif items[i + 1] >= items[i]:
+                decreasing = False
+            i += 1
+
+        if decreasing is True:
+            items = items[:remove] + items[remove + 1:]
+            lines_decreasing.append(items)
+
+    count = 0
+    for line in lines_increasing:
+        i = 0
+        valid_flag = True
+        while i < len(line) - 1:
+            incr = line[i + 1] - line[i]
+            if valid_flag is False:
+                break
+            if incr < 1 or incr > 3:
+                valid_flag = False
+            i += 1
+        if valid_flag == True:
+            count += 1
+
+    for line in lines_decreasing:
+        i = 0
+        valid_flag = True
+        while i < len(line) - 1:
+            decr = line[i] - line[i + 1]
+            if valid_flag is False:
+                break
+            if decr < 1 or decr > 3:
+                valid_flag = False
+            i += 1
+        if valid_flag == True:
+            count += 1
+        
+    return count  # more than 312 and not 320
 
 
 INPUT_S = '''\
-xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
+7 6 4 2 1
+1 2 7 8 9
+9 7 6 2 1
+1 3 2 4 5
+8 6 4 4 1
+1 3 6 7 9
 '''
-EXPECTED = 48
+EXPECTED = 4
 
 
 @pytest.mark.parametrize(
@@ -73,7 +120,7 @@ def main() -> int:
     with open(args.data_file) as f, support.timing():
         print(compute(f.read()))
 
-    return 0  # 77055967
+    return 0
 
 
 if __name__ == '__main__':

@@ -13,78 +13,24 @@ INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 def compute(s: str) -> int:
     lines = s.splitlines()
-    grid = [list(line) for line in lines]
+    result = 0
 
-    count = 0
+    for line in lines:
+        # Regex pattern to find "mul(int,int)"
+        pattern = r"mul\(\d+,\d+\)"
 
-    for i in range(len(grid)):
-        for j in range(len(grid[i])):
-            if grid[i][j] == 'X':
-                # Check the row forward
-                if j + 3 < len(grid[i]) and \
-                    grid[i][j + 1] == 'M' and \
-                    grid[i][j + 2] == 'A' and \
-                    grid[i][j + 3] == 'S':
-                    count += 1
-                # Check the row backward
-                if j - 3 >= 0 and \
-                    grid[i][j - 1] == 'M' and \
-                    grid[i][j - 2] == 'A' and \
-                    grid[i][j - 3] == 'S':
-                    count += 1
-                # Check the column downward
-                if i + 3 < len(grid) and \
-                    grid[i + 1][j] == 'M' and \
-                    grid[i + 2][j] == 'A' and \
-                    grid[i + 3][j] == 'S':
-                    count += 1
-                # Check the column upward
-                if i - 3 >= 0 and \
-                    grid[i - 1][j] == 'M' and \
-                    grid[i - 2][j] == 'A' and \
-                    grid[i - 3][j] == 'S':
-                    count += 1
-                # Check the diagonal downward right
-                if i + 3 < len(grid) and j + 3 < len(grid[i]) and \
-                    grid[i + 1][j + 1] == 'M' and \
-                    grid[i + 2][j + 2] == 'A' and \
-                    grid[i + 3][j + 3] == 'S':
-                    count += 1
-                # Check the diagonal downward left
-                if i + 3 < len(grid) and j - 3 >= 0 and \
-                    grid[i + 1][j - 1] == 'M' and \
-                    grid[i + 2][j - 2] == 'A' and \
-                    grid[i + 3][j - 3] == 'S':
-                    count += 1
-                # Check the diagonal upward right
-                if i - 3 >= 0 and j + 3 < len(grid[i]) and \
-                    grid[i - 1][j + 1] == 'M' and \
-                    grid[i - 2][j + 2] == 'A' and \
-                    grid[i - 3][j + 3] == 'S':
-                    count += 1
-                # Check the diagonal upward left
-                if i - 3 >= 0 and j - 3 >= 0 and \
-                    grid[i - 1][j - 1] == 'M' and \
-                    grid[i - 2][j - 2] == 'A' and \
-                    grid[i - 3][j - 3] == 'S':
-                    count += 1
-
-    return count
+        # Find all matches
+        matches = re.findall(pattern, line)
+        for match in matches:
+            int1, int2 = re.findall(r"\d+", match)
+            result = result + int(int1) * int(int2)
+    return result
 
 
 INPUT_S = '''\
-MMMSXXMASM
-MSAMXMSMSA
-AMXSXMAAMM
-MSAMASMSMX
-XMASAMXAMM
-XXAMMXXAMA
-SMSMSASXSS
-SAXAMASAAA
-MAMMMXMMMM
-MXMXAXMASX
+xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 '''
-EXPECTED = 18
+EXPECTED = 161
 
 
 @pytest.mark.parametrize(
@@ -105,7 +51,7 @@ def main() -> int:
     with open(args.data_file) as f, support.timing():
         print(compute(f.read()))
 
-    return 0  # 2662
+    return 0
 
 
 if __name__ == '__main__':
