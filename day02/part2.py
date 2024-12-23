@@ -27,14 +27,16 @@ def compute(s: str) -> int:
 
         while i < len(items) - 1:
             if items[i + 1] <= items[i] and free_pass is True:
-                remove = i + 1
+                remove = i
                 free_pass = False
+                items = items[:remove] + items[remove + 1:]
+                i -= 1
             elif items[i + 1] <= items[i]:
                 increasing = False
             i += 1
 
         if increasing is True:
-            items = items[:remove] + items[remove + 1:]
+            # items = items[:remove] + items[remove + 1:]
             lines_increasing.append(items)
 
     lines_decreasing = []
@@ -51,14 +53,15 @@ def compute(s: str) -> int:
 
         while i < len(items) - 1:
             if items[i + 1] >= items[i] and free_pass is True:
-                remove = i + 1
+                remove = i
                 free_pass = False
+                items = items[:remove] + items[remove + 1:]
+                i -= 1
             elif items[i + 1] >= items[i]:
                 decreasing = False
             i += 1
 
         if decreasing is True:
-            items = items[:remove] + items[remove + 1:]
             lines_decreasing.append(items)
 
     count = 0
@@ -88,7 +91,7 @@ def compute(s: str) -> int:
         if valid_flag == True:
             count += 1
         
-    return count  # more than 312 and not 320
+    return count  # more than 312 and not 260, 308, 310, 314, 320
 
 
 INPUT_S = '''\
